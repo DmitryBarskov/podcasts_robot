@@ -9,13 +9,14 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
  * @param {object} body parameters for the method
  * @returns {Promise} parsed response from telegram
  */
-const telegramMethod = (method, body = null) => {
+const telegramMethod = (method, { body = null, headers = {} }) => {
   console.debug('Sending request to telegram:', method, body);
   return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${method}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      ...headers
     },
     body: body ? JSON.stringify(body) : '',
   }).then(r => r.json()).then(response => {

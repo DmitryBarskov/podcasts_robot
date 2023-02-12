@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "handler.js",
   "dependencies": {
+    "form-data": "^4.0.0",
     "node-fetch": "^2.6.9",
     "ytdl-core": "^4.11.2"
   },
