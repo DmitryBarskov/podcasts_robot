@@ -41,8 +41,10 @@ exports.handler = withLogging(async (event) => {
 
   if (!isValidUrl) {
     await telegramMethod('sendMessage', {
-      chat_id: telegramEvent.message.chat.id,
-      text: 'I\'m a robot! Send me a youtube video! 😋',
+      body: {
+        chat_id: telegramEvent.message.chat.id,
+        text: 'I\'m a robot! Send me a youtube video! 😋',
+      },
     });
     return respondWith({ message: 'ok' });
   }
@@ -50,16 +52,18 @@ exports.handler = withLogging(async (event) => {
   const info = await ytdl.getBasicInfo(videoLink);
   const trackTitle = `${info.videoDetails.title} -- ${info.videoDetails.author.name}`;
 
-  let telegramResponse = telegramMethod('sendMessage', {
-    chat_id: telegramEvent.message.chat.id,
-    text: `You sent me ${trackTitle}`,
+  let telegramResponse = await telegramMethod('sendMessage', {
+    body: {
+      chat_id: telegramEvent.message.chat.id,
+      text: `You sent me ${trackTitle}`,
+    },
   });
-  let queueResponse = sendToQueue({
+  let _queueResponse = await sendToQueue({
     videoLink,
     chatId: telegramEvent.message.chat.id,
+    requestMessageId: telegramEvent.message.message_id,
+    responseMessageId: telegramResponse.result.message_id,
   });
-
-  await Promise.all([telegramResponse, queueResponse]);
 
   return respondWith({ message: 'ok' });
 });
