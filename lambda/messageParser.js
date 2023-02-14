@@ -1,8 +1,10 @@
 const ytdl = require('ytdl-core');
+const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
+
 const withLogging = require('src/withLogging.js');
 const respondWith = require('src/lambdaResponse.js');
 const telegramMethod = require('src/telegramMethod.js');
-const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
+const randomEmoji = require('src/randomEmoji.js');
 
 const sqsClient = new SQSClient();
 const QUEUE = process.env.QUEUE_URL;
@@ -43,19 +45,19 @@ exports.handler = withLogging(async (event) => {
     await telegramMethod('sendMessage', {
       body: {
         chat_id: telegramEvent.message.chat.id,
-        text: 'I\'m a robot! Send me a youtube video! 😋',
+        text: `I'm a robot! Send me a youtube video! ${randomEmoji()}`,
       },
     });
     return respondWith({ message: 'ok' });
   }
 
   const info = await ytdl.getBasicInfo(videoLink);
-  const trackTitle = `${info.videoDetails.title} -- ${info.videoDetails.author.name}`;
+  const trackTitle = `${info.videoDetails.title} – ${info.videoDetails.author.name}`;
 
   let telegramResponse = await telegramMethod('sendMessage', {
     body: {
       chat_id: telegramEvent.message.chat.id,
-      text: `You sent me ${trackTitle}`,
+      text: trackTitle,
     },
   });
   let _queueResponse = await sendToQueue({
