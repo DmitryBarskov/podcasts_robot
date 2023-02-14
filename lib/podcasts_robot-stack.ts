@@ -1,9 +1,9 @@
-import { Stack, StackProps, Duration } from 'aws-cdk-lib';
+import { Stack, StackProps, Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
-
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 
 export interface PodcastsRobotStackProps extends StackProps {
@@ -32,16 +32,24 @@ export class PodcastsRobotStack extends Stack {
     });
     queue.grantSendMessages(messageParser);
 
+    const podcastsStorage = new Bucket(this, 'PodcastsStorage', {
+      bucketName: 'podcastsrobot',
+      removalPolicy: RemovalPolicy.RETAIN,
+      publicReadAccess: true,
+    });
+
     const videoDownloader = new lambda.Function(this, 'VideoDownloader', {
       runtime: lambda.Runtime.NODEJS_16_X,
       code: lambda.Code.fromAsset('lambda'),
       handler: 'videoDownloader.handler',
-      timeout: Duration.seconds(60),
+      timeout: Duration.seconds(5 * 60),
       environment: {
         BOT_TOKEN: props.botToken,
+        BUCKET: podcastsStorage.bucketName,
       },
     });
     queue.grantConsumeMessages(videoDownloader);
     videoDownloader.addEventSource(new SqsEventSource(queue));
+    podcastsStorage.grantReadWrite(videoDownloader);
   }
 }

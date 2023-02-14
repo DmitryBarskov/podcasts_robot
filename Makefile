@@ -1,2 +1,2 @@
 %:
-	aws-vault exec fwd-tweet -- cdk $@
+	aws-vault exec fwd-tweet -- npx cdk $@

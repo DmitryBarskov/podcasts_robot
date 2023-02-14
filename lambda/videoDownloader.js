@@ -1,9 +1,8 @@
 const ytdl = require('ytdl-core');
-const FormData = require('form-data');
+
 const withLogging = require('src/withLogging.js');
-const telegramMethod = require('./src/telegramMethod');
-const fetch = require('node-fetch');
-const fs = require('fs');
+const telegramMethod = require('src/telegramMethod');
+const storeFile = require('src/storeFile.js');
 
 /**
  * @param {string} videoLink link to youtube video (validated arleady)
@@ -16,38 +15,19 @@ const processRecord = async ({ videoLink, chatId, requestMessageId, responseMess
   let videoInfo = await ytdl.getInfo(videoId);
   let format = ytdl.chooseFormat(videoInfo.formats, { quality: '140' });
   let details = videoInfo.videoDetails;
-  let thumbnailUrl = details.thumbnails.reduce((prev, curr) => prev.height < curr.height ? prev : curr).url;
-  let thumbnailImage = await fetch(thumbnailUrl);
   let audio = ytdl(videoId, { format });
 
+  let audioFileKey = `${videoId}.m4a`;
+  let audioUrl = await storeFile(audioFileKey, audio);
 
-  let audioFile = `/tmp/${videoId}.m4a`;
-  audio.pipe(fs.createWriteStream(audioFile));
-  console.debug('Downloaded audio:', videoLink);
-
-  let thumbnailFile = `/tmp/${videoId}.jpg`;
-  thumbnailImage.body.pipe(fs.createWriteStream(thumbnailFile));
-  console.debug('Downloaded image:', thumbnailUrl);
-
-  let form = new FormData();
-  form.append('chat_id', chatId.toString());
-  form.append('performer', details.ownerChannelName);
-  form.append('title', details.title);
-  form.append('thumb', fs.createReadStream(thumbnailFile), {
-    filename: 'thumb.jpg', contentType: 'image/jpeg',
-    knownLength: parseInt(thumbnailImage.headers.get('content-length')),
-  });
-  form.append('audio', fs.createReadStream(audioFile), {
-    filename: `${details.title} - ${details.ownerChannelName}.m4a`,
-    contentType: 'audio/mpeg',
-    knownLength: parseInt(format.contentLength),
-  });
-
-  console.log('Form created!');
-
-  return await telegramMethod('sendAudio', {
-    headers: form.getHeaders(),
-    body: form,
+  return telegramMethod('sendAudio', {
+    body: {
+      chat_id: chatId,
+      performer: details.ownerChannelName,
+      title: details.title,
+      audio: audioUrl,
+      duration: parseInt(details.lengthSeconds),
+    },
   });
 };
 
