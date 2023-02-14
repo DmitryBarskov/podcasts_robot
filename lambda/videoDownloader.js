@@ -1,6 +1,4 @@
 const ytdl = require('ytdl-core');
-const fetch = require('node-fetch');
-const FormData = require('form-data');
 
 const withLogging = require('src/withLogging.js');
 const telegramMethod = require('src/telegramMethod');
