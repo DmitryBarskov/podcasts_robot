@@ -42,7 +42,7 @@ export class PodcastsRobotStack extends Stack {
       runtime: lambda.Runtime.NODEJS_16_X,
       code: lambda.Code.fromAsset('lambda'),
       handler: 'videoDownloader.handler',
-      timeout: Duration.seconds(5 * 60),
+      timeout: Duration.seconds(3 * 60),
       memorySize: 256,
       environment: {
         BOT_TOKEN: props.botToken,
