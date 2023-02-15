@@ -43,7 +43,7 @@ export class PodcastsRobotStack extends Stack {
       code: lambda.Code.fromAsset('lambda'),
       handler: 'videoDownloader.handler',
       timeout: Duration.seconds(3 * 60),
-      memorySize: 256,
+      memorySize: 480,
       environment: {
         BOT_TOKEN: props.botToken,
         BUCKET: podcastsStorage.bucketName,
