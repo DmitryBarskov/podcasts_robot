@@ -8,5 +8,4 @@ node_modules/
 .cdk.staging
 cdk.out
 
-!/lambda/*.js
-!/lambda/src/*.js
+!/lambda/**/*.js
