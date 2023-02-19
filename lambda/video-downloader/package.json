@@ -1,12 +1,9 @@
 {
-  "name": "lambda",
+  "name": "video-downloader",
   "version": "1.0.0",
   "main": "handler.js",
   "dependencies": {
-    "node-fetch": "^2.6.9",
-    "ytdl-core": "^4.11.2"
-  },
-  "devDependencies": {
+    "ytdl-core": "^4.11.2",
     "@aws-sdk/client-sqs": "^3.267.0",
     "@aws-sdk/client-s3": "^3.267.0"
   }

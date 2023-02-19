@@ -1,0 +1,8 @@
+{
+  "name": "bot-entrypoint",
+  "version": "1.0.0",
+  "main": "handler.js",
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.267.0"
+  }
+}
