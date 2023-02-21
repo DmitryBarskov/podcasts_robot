@@ -1,8 +1,8 @@
+const fs = require('fs');
 const { S3 } = require('@aws-sdk/client-s3');
 const bufferFromStream = require('./bufferFromStream.js');
 
 const BUCKET = process.env.BUCKET;
-
 const s3 = new S3({});
 
 const uploadFile = async (key, stream) => {
@@ -20,6 +20,13 @@ const uploadFile = async (key, stream) => {
   return data;
 };
 
+/**
+ * Ensures that file with given key exists.
+ *
+ * @param {String} key path in S3 bucket
+ * @param {Stream} stream object's content as a stream
+ * @returns public URL of the object
+ */
 const storeFile = async (key, stream) => {
   await s3.headObject({ Bucket: BUCKET, Key: key })
     .then(_ => {

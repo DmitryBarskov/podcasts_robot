@@ -1,24 +1,10 @@
-const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
 const ytdl = require('ytdl-core');
+const { slugify } = require('transliteration');
 
+const fetchAudioData = require('./fetchAudioData.js');
+const { splitAudioStream, cleanUp } = require('./splitAudioStream.js');
 const storeFile = require('./storeFile.js');
-
-const sqsClient = new SQSClient();
-const TELEGRAM_REQUEST_QUEUE_URL = process.env.TELEGRAM_REQUEST_QUEUE_URL;
-
-const telegramMethod = async (messageBody) => {
-  console.debug('Sending to SQS:', { TELEGRAM_REQUEST_QUEUE_URL, messageBody });
-  try {
-    const output = await sqsClient.send(new SendMessageCommand({
-      MessageBody: JSON.stringify(messageBody),
-      QueueUrl: TELEGRAM_REQUEST_QUEUE_URL,
-    }));
-    console.debug('Received response from SQS:', output);
-    return output;
-  } catch (err) {
-    console.error('Error resopsne from SQS:', err);
-  }
-};
+const telegramApi = require('./telegramApi.js');
 
 /**
  * @param {string} videoLink link to youtube video (validated arleady)
@@ -27,33 +13,41 @@ const telegramMethod = async (messageBody) => {
  */
 const processRecord = async ({ videoLink, chatId, requestMessageId }) => {
   if (!ytdl.validateURL(videoLink)) {
-    return await telegramMethod({
+    return await telegramApi({
       type: 'invalidUrl',
       chatId, requestMessageId,
     });
   }
 
-  let videoId = ytdl.getURLVideoID(videoLink);
-  let videoInfo = await ytdl.getInfo(videoId);
-  let format = ytdl.chooseFormat(videoInfo.formats, { quality: '140' });
-  let details = videoInfo.videoDetails;
-  let audio = ytdl(videoId, { format });
+  let {
+    audio, videoId, performer, title, durationS, sizeMb
+  } = await fetchAudioData(videoLink);
+  console.debug('Downloading', { videoId, performer, title, durationS, sizeMb });
+  let chunks = await splitAudioStream(audio, {
+    maxSegmentSizeMb: 19.9, sizeMb, durationS,
+    dirname: videoId, prefix: slugify(`${title} - ${performer}`),
+  });
 
-  let audioFileKey = `${videoId}.m4a`;
-  let audioUrl = await storeFile(audioFileKey, audio);
+  console.debug('Downloaded chunks:', chunks);
 
-  return await telegramMethod({
+  const telegramAudios = chunks.map(async (chunk) => {
+    let url = await storeFile(chunk.tmpPath, chunk.stream);
+
+    return {
+      audio: url,
+      title: chunk.filename,
+      performer: performer,
+      duration: chunk.segmentDurationS,
+    };
+  });
+
+  return await telegramApi({
     type: 'downloadSuccess',
     chatId, requestMessageId,
-    title: `${details.title} – ${details.author.name}`,
-    audioData: [
-      {
-        performer: details.ownerChannelName,
-        title: details.title,
-        audio: audioUrl,
-        duration: parseInt(details.lengthSeconds),
-      }
-    ],
+    audioData: await Promise.all(telegramAudios),
+  }).then((...args) => {
+    cleanUp(videoId);
+    return args;
   });
 };
 
