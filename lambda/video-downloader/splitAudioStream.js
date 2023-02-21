@@ -1,7 +1,6 @@
 const cp = require('child_process');
 const fs = require('fs');
 const ffmpeg = require('ffmpeg-static');
-const { dirname } = require('path');
 
 const segmentsAmount = ({ fileSizeMb, maxSegmentSizeMb }) =>
   Math.floor(fileSizeMb / maxSegmentSizeMb) + 1;
@@ -22,7 +21,7 @@ const lastSegmentDuration = ({ segmentsAmount, duration }) =>
  * @param {String} prefix prefix for all the resulting segments
  * @returns {Object[]} streams of all the segments and their metadata
  */
-const splitAudioStream = (
+const splitAudioStream = async (
   audio, { maxSegmentSizeMb, sizeMb, durationS, dirname, prefix }
 ) => {
   console.debug('Splitting', { maxSegmentSizeMb, sizeMb, durationS, dirname, prefix });
@@ -52,26 +51,36 @@ const splitAudioStream = (
   });
   audio.pipe(ffmpegProcess.stdio[3]);
 
-  return fs.readdirSync(`/tmp/${dirname}`).map((filename, index, fileList) => {
-    let tmpPath = `${dirname}/${filename}`;
-    let fullPath = `/tmp/${tmpPath}`;
-    let currentSegmentDurationS = (
-      index === fileList.length - 1 ?
-        lastSegmentDuration({ segmentsAmount: segments, duration: durationS }) :
-        segmentDurationS
-    );
-    return ({
-      stream: fs.createReadStream(fullPath),
-      tmpPath,
-      filename,
-      fullPath,
-      segmentDurationS: currentSegmentDurationS,
+  return new Promise((resolve, reject) => {
+    ffmpegProcess.on('close', () => {
+      const segmentsData = fs.readdirSync(`/tmp/${dirname}`).map((filename, index, fileList) => {
+        let tmpPath = `${dirname}/${filename}`;
+        let fullPath = `/tmp/${tmpPath}`;
+        let currentSegmentDurationS = (
+          index === fileList.length - 1 ?
+            lastSegmentDuration({ segmentsAmount: segments, duration: durationS }) :
+            segmentDurationS
+        );
+        return ({
+          stream: fs.createReadStream(fullPath),
+          tmpPath,
+          filename,
+          fullPath,
+          segmentDurationS: currentSegmentDurationS,
+        });
+      });
+
+      resolve(segmentsData);
     });
   });
 };
 
 const cleanUp = (videoId) => {
-  fs.rm(`/tmp/${videoId}`, { recursive: true, force: true });
+  fs.rm(`/tmp/${videoId}`, { recursive: true, force: true }, err => {
+    if (err) {
+      console.err('Error cleaning up', err);
+    }
+  });
 }
 
 module.exports = { splitAudioStream, cleanUp };

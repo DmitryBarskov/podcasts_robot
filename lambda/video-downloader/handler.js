@@ -1,4 +1,5 @@
 const ytdl = require('ytdl-core');
+const { slugify } = require('transliteration');
 
 const fetchAudioData = require('./fetchAudioData.js');
 const { splitAudioStream, cleanUp } = require('./splitAudioStream.js');
@@ -22,10 +23,12 @@ const processRecord = async ({ videoLink, chatId, requestMessageId }) => {
     audio, videoId, performer, title, durationS, sizeMb
   } = await fetchAudioData(videoLink);
   console.debug('Downloading', { videoId, performer, title, durationS, sizeMb });
-  let chunks = splitAudioStream(audio, {
+  let chunks = await splitAudioStream(audio, {
     maxSegmentSizeMb: 19.9, sizeMb, durationS,
-    dirname: videoId, prefix: `${title} - ${performer}`,
+    dirname: videoId, prefix: slugify(`${title} - ${performer}`),
   });
+
+  console.debug('Downloaded chunks:', chunks);
 
   const telegramAudios = chunks.map(async (chunk) => {
     let url = await storeFile(chunk.tmpPath, chunk.stream);
