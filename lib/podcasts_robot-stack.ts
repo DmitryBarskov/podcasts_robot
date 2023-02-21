@@ -44,6 +44,7 @@ export class PodcastsRobotStack extends Stack {
       handler: 'handler.handler',
       timeout: Duration.seconds(3 * 60),
       memorySize: 480,
+      architecture: lambda.Architecture.ARM_64,
       environment: {
         BOT_TOKEN: props.botToken,
         BUCKET: podcastsStorage.bucketName,
