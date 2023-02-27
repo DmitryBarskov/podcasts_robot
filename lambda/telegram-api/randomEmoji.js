@@ -1,5 +1,5 @@
 
-const EMOJIS = `😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😋 😏 🤖`.split(' ');
+const EMOJIS = '😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😋 😏 🤖'.split(' ');
 
 const randomEmoji = () => {
   return EMOJIS[Math.floor(Math.random() * EMOJIS.length)];

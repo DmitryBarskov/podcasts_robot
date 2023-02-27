@@ -15,35 +15,44 @@ const processRecord = async ({ videoLink, chatId, requestMessageId }) => {
   if (!ytdl.validateURL(videoLink)) {
     return await telegramApi({
       type: 'invalidUrl',
-      chatId, requestMessageId,
+      chatId,
+      requestMessageId,
     });
   }
 
-  let {
+  const {
     audio, videoId, performer, title, durationS, sizeMb
-  } = await fetchAudioData(videoLink);
+  } = await fetchAudioData(videoLink).catch((err) => {
+    console.error('Error fetching data from YouTube', err);
+    throw err;
+  });
+
   console.debug('Downloading', { videoId, performer, title, durationS, sizeMb });
-  let chunks = await splitAudioStream(audio, {
-    maxSegmentSizeMb: 19.9, sizeMb, durationS,
-    dirname: videoId, prefix: slugify(`${title} - ${performer}`),
+  const chunks = await splitAudioStream(audio, {
+    maxSegmentSizeMb: 19.9,
+    sizeMb,
+    durationS,
+    dirname: videoId,
+    prefix: slugify(`${title} - ${performer}`),
   });
 
   console.debug('Downloaded chunks:', chunks);
 
   const telegramAudios = chunks.map(async (chunk) => {
-    let url = await storeFile(chunk.tmpPath, chunk.stream);
+    const url = await storeFile(chunk.tmpPath, chunk.stream);
 
     return {
       audio: url,
       title: chunk.filename,
-      performer: performer,
+      performer,
       duration: chunk.segmentDurationS,
     };
   });
 
   return await telegramApi({
     type: 'downloadSuccess',
-    chatId, requestMessageId,
+    chatId,
+    requestMessageId,
     audioData: await Promise.all(telegramAudios),
   }).then((...args) => {
     cleanUp(videoId);
@@ -60,8 +69,8 @@ const processRecord = async ({ videoLink, chatId, requestMessageId }) => {
  * }
  */
 exports.handler = async (event) => {
-  let promises = event.Records.map(record => {
-    console.debug("Processing rec:", record);
+  const promises = event.Records.map(record => {
+    console.debug('Processing rec:', record);
     return processRecord(JSON.parse(record.body));
   });
   await Promise.all(promises);

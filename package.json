@@ -9,14 +9,22 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "set-webhook": "source .env && npx ts-node bin/set_webhook.ts"
+    "set-webhook": "source .env && npx ts-node bin/set_webhook.ts",
+    "lint": "npx eslint lambda bin"
   },
   "devDependencies": {
     "@types/jest": "^27.5.2",
     "@types/node": "10.17.27",
     "@types/prettier": "2.6.0",
     "@types/source-map-support": "^0.5.6",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
     "aws-cdk": "2.47.0",
+    "eslint": "^8.34.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-config-standard-with-typescript": "^34.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.6.1",
+    "eslint-plugin-promise": "^6.1.1",
     "jest": "^27.5.1",
     "ts-jest": "^27.1.4",
     "ts-node": "^10.9.1",

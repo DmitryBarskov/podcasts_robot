@@ -1,4 +1,3 @@
-const fs = require('fs');
 const { S3 } = require('@aws-sdk/client-s3');
 const bufferFromStream = require('./bufferFromStream.js');
 
@@ -14,7 +13,7 @@ const uploadFile = async (key, stream) => {
   };
   console.debug('Putting object to S3:', { BUCKET, key });
 
-  let data = await s3.putObject(putCommand);
+  const data = await s3.putObject(putCommand);
 
   console.debug('Response from S3:', data);
   return data;
@@ -33,7 +32,7 @@ const storeFile = async (key, stream) => {
       console.log('File already present!', { BUCKET, key });
     })
     .catch(async (err) => {
-      if (err['$metadata'].httpStatusCode == 404) {
+      if (err.$metadata.httpStatusCode === 404) {
         await uploadFile(key, stream);
       } else {
         throw new Error(err);
