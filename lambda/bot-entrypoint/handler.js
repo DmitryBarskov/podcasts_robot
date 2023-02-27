@@ -35,7 +35,9 @@ const sendToQueue = async (messageBody) => {
  */
 exports.handler = async (event) => {
   const telegramEvent = JSON.parse(event.body);
-  const message = telegramEvent.message ?? telegramEvent.edited_message;
+  const message = telegramEvent.message ??
+                  telegramEvent.edited_message ??
+                  telegramEvent.channel_post;
 
   console.debug('Received telegram event:', telegramEvent);
   if (!message?.text) {
