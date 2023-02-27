@@ -24,7 +24,6 @@ const processRecord = async (event) => {
           chat_id: event.chatId,
           reply_to_message_id: event.requestMessageId,
           allow_sending_without_reply: true,
-          protect_content: true,
           ...chunk,
         },
       });
