@@ -4,7 +4,7 @@
   "main": "handler.js",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.279.0",
-    "@aws-sdk/client-sqs": "^3.267.0",
+    "@aws-sdk/client-sqs": "^3.279.0",
     "ffmpeg-static": "^5.1.0",
     "transliteration": "^2.3.5",
     "ytdl-core": "^4.11.2"
