@@ -1,11 +1,11 @@
 const ytdl = require('ytdl-core');
 
 const fetchAudioData = async (videoLink) => {
-  let videoId = ytdl.getURLVideoID(videoLink);
-  let videoInfo = await ytdl.getInfo(videoId);
-  let format = ytdl.chooseFormat(videoInfo.formats, { quality: '140' });
-  let audio = ytdl(videoId, { format });
-  let videoDetails = videoInfo.videoDetails;
+  const videoId = ytdl.getURLVideoID(videoLink);
+  const videoInfo = await ytdl.getInfo(videoId);
+  const format = ytdl.chooseFormat(videoInfo.formats, { quality: '140' });
+  const audio = ytdl(videoId, { format });
+  const videoDetails = videoInfo.videoDetails;
 
   return {
     audio,
@@ -15,6 +15,6 @@ const fetchAudioData = async (videoLink) => {
     durationS: parseInt(videoDetails.lengthSeconds),
     sizeMb: parseInt(format.contentLength) / 1024 / 1024,
   };
-}
+};
 
 module.exports = fetchAudioData;

@@ -25,8 +25,8 @@ const splitAudioStream = async (
   audio, { maxSegmentSizeMb, sizeMb, durationS, dirname, prefix }
 ) => {
   console.debug('Splitting', { maxSegmentSizeMb, sizeMb, durationS, dirname, prefix });
-  let segments = segmentsAmount({ maxSegmentSizeMb, fileSizeMb: sizeMb });
-  let segmentDurationS = segmentDuration({
+  const segments = segmentsAmount({ maxSegmentSizeMb, fileSizeMb: sizeMb });
+  const segmentDurationS = segmentDuration({
     segmentsAmount: segments, duration: durationS
   });
 
@@ -51,15 +51,15 @@ const splitAudioStream = async (
   });
   audio.pipe(ffmpegProcess.stdio[3]);
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     ffmpegProcess.on('close', () => {
       const segmentsData = fs.readdirSync(`/tmp/${dirname}`).map((filename, index, fileList) => {
-        let tmpPath = `${dirname}/${filename}`;
-        let fullPath = `/tmp/${tmpPath}`;
-        let currentSegmentDurationS = (
-          index === fileList.length - 1 ?
-            lastSegmentDuration({ segmentsAmount: segments, duration: durationS }) :
-            segmentDurationS
+        const tmpPath = `${dirname}/${filename}`;
+        const fullPath = `/tmp/${tmpPath}`;
+        const currentSegmentDurationS = (
+          index === fileList.length - 1
+            ? lastSegmentDuration({ segmentsAmount: segments, duration: durationS })
+            : segmentDurationS
         );
         return ({
           stream: fs.createReadStream(fullPath),
@@ -81,6 +81,6 @@ const cleanUp = (videoId) => {
       console.err('Error cleaning up', err);
     }
   });
-}
+};
 
 module.exports = { splitAudioStream, cleanUp };

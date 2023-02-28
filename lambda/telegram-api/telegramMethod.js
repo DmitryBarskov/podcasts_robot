@@ -15,7 +15,7 @@ const telegramMethod = (method, { body = null, headers = {} }) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...headers
     },
     body: body ? JSON.stringify(body) : '',

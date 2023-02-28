@@ -1,8 +1,8 @@
-const telegramMethod = require("./telegramMethod.js");
+const telegramMethod = require('./telegramMethod.js');
 const randomEmoji = require('./randomEmoji.js');
 
 const processRecord = async (event) => {
-  if (event.type == 'invalidUrl') {
+  if (event.type === 'invalidUrl') {
     return await telegramMethod('sendMessage', {
       body: {
         chat_id: event.chatId,
@@ -10,7 +10,7 @@ const processRecord = async (event) => {
         text: `I'm a robot! Send me a youtube video! ${randomEmoji()}`
       },
     });
-  } else if (event.type == 'downloadSuccess') {
+  } else if (event.type === 'downloadSuccess') {
     const sendTitle = telegramMethod('sendMessage', {
       body: {
         chat_id: event.chatId,
@@ -45,8 +45,8 @@ const processRecord = async (event) => {
  * }
  */
 exports.handler = async (event) => {
-  let promises = event.Records.map(record => {
-    console.debug("Processing rec:", record);
+  const promises = event.Records.map(record => {
+    console.debug('Processing rec:', record);
     return processRecord(JSON.parse(record.body));
   });
   await Promise.all(promises);

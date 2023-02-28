@@ -4,7 +4,7 @@ const sqsClient = new SQSClient();
 const DOWNLOAD_QUEUE_URL = process.env.DOWNLOAD_QUEUE_URL;
 const DEFAULT_RESPONSE = {
   statusCode: 200,
-  headers: { 'Content-Type': 'application/json', },
+  headers: { 'Content-Type': 'application/json' },
   body: '{"message":"ok"}',
 };
 
@@ -45,7 +45,7 @@ exports.handler = async (event) => {
     return DEFAULT_RESPONSE;
   }
 
-  let _queueResponse = await sendToQueue({
+  await sendToQueue({
     videoLink: message.text,
     chatId: message.chat.id,
     requestMessageId: message.message_id,
