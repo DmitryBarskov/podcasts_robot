@@ -9,6 +9,8 @@ if (process.env.BOT_TOKEN === undefined) {
 }
 
 const app = new cdk.App();
+
+// eslint-disable-next-line no-new
 new PodcastsRobotStack(app, 'PodcastsRobotStack', {
   botToken: process.env.BOT_TOKEN,
   /* If you don't specify 'env', this stack will be environment-agnostic.
