@@ -5,6 +5,7 @@ const fetchAudioData = require('./fetchAudioData.js');
 const { splitAudioStream, cleanUp } = require('./splitAudioStream.js');
 const storeFile = require('./storeFile.js');
 const telegramApi = require('./telegramApi.js');
+const withTimeout = require('./withTimeout.js');
 
 /**
  * @param {string} videoLink link to youtube video (validated arleady)
@@ -69,10 +70,14 @@ const processRecord = async ({ videoLink, chatId, requestMessageId }) => {
  * }
  */
 exports.handler = async (event) => {
-  const promises = event.Records.map(record => {
-    console.debug('Processing rec:', record);
-    return processRecord(JSON.parse(record.body));
+  await withTimeout(async () => {
+    const promises = event.Records.map((record) => {
+      console.debug('Processing rec:', record);
+      return processRecord(JSON.parse(record.body));
+    });
+    return await Promise.all(promises);
+  }, 150_000).catch((err) => {
+    console.error(err);
   });
-  await Promise.all(promises);
   return Promise.resolve({});
 };
