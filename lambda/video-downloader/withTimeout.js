@@ -1,14 +1,15 @@
 const withTimeout = async (asyncFunc, timeoutInMs, ...args) => {
-  let pendingResult = asyncFunc(args);
+  const pendingResult = asyncFunc(args);
+  const delayedError = new Promise((_resolve, reject) => {
+    setTimeout(
+      reject,
+      timeoutInMs,
+      `Function reached its timeout ${timeoutInMs} ms.`
+    );
+  });
   return await Promise.race([
     pendingResult,
-    new Promise((_resolve, reject) => {
-      setTimeout(
-        reject,
-        timeoutInMs,
-        `Function reached its timeout ${timeoutInMs} ms.`
-      );
-    }),
+    delayedError,
   ]);
 };
 

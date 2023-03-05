@@ -1,5 +1,5 @@
-import { Stack, type StackProps, Duration, RemovalPolicy } from 'aws-cdk-lib';
-import { type Construct } from 'constructs';
+import { Stack, StackProps, Duration, RemovalPolicy } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Queue } from 'aws-cdk-lib/aws-sqs';

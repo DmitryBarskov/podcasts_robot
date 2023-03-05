@@ -24,13 +24,43 @@ const lastSegmentDuration = ({ segmentsAmount, duration }) =>
 const splitAudioStream = async (
   audio, { maxSegmentSizeMb, sizeMb, durationS, dirname, prefix }
 ) => {
-  console.debug('Splitting', { maxSegmentSizeMb, sizeMb, durationS, dirname, prefix });
+  console.debug('invoke splitAudioStream', { maxSegmentSizeMb, sizeMb, durationS, dirname, prefix });
+
+  fs.mkdirSync(`/tmp/${dirname}`, { recursive: true });
+
+  if (sizeMb < maxSegmentSizeMb) {
+    console.debug('Continue without splitting');
+    const filename = `${prefix}.m4a`;
+    const tmpPath = `${dirname}/${filename}`;
+    const fullPath = `/tmp/${tmpPath}`;
+
+    fs.createWriteStream(fullPath, audio);
+
+    return Promise.resolve([
+      {
+        stream: fs.createReadStream(fullPath),
+        tmpPath,
+        filename,
+        fullPath,
+        segmentDurationS: durationS,
+      }
+    ]);
+  }
+
   const segments = segmentsAmount({ maxSegmentSizeMb, fileSizeMb: sizeMb });
   const segmentDurationS = segmentDuration({
     segmentsAmount: segments, duration: durationS
   });
 
-  fs.mkdirSync(`/tmp/${dirname}`, { recursive: true });
+  console.debug('Splitting...', {
+    maxSegmentSizeMb,
+    sizeMb,
+    durationS,
+    dirname,
+    prefix,
+    segments,
+    segmentDurationS,
+  });
 
   const ffmpegProcess = cp.spawn(ffmpeg, [
     '-loglevel', '8', '-hide_banner',

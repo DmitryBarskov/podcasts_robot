@@ -50,6 +50,7 @@ const processRecord = async ({ videoLink, chatId, requestMessageId }) => {
     };
   });
 
+  console.debug('Sending to telegram...')
   return await telegramApi({
     type: 'downloadSuccess',
     chatId,
@@ -75,9 +76,12 @@ exports.handler = async (event) => {
       console.debug('Processing rec:', record);
       return processRecord(JSON.parse(record.body));
     });
-    return await Promise.all(promises);
+    await Promise.all(promises);
+    console.debug('All records processed!');
+    return Promise.resolve({});
   }, 150_000).catch((err) => {
     console.error(err);
   });
+  console.debug('All records processed!');
   return Promise.resolve({});
 };
