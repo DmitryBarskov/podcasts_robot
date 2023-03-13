@@ -15,11 +15,11 @@ export class PodcastsRobotStack extends Stack {
     super(scope, id, props);
 
     const downloadRequestQueue = new Queue(this, 'DownloadRequestQueue', {
-      visibilityTimeout: Duration.seconds(3 * 60),
+      visibilityTimeout: Duration.minutes(3),
     });
 
     const telegramRequestQueue = new Queue(this, 'TelegramRequestQueue', {
-      visibilityTimeout: Duration.seconds(5 * 60),
+      visibilityTimeout: Duration.minutes(5),
     });
 
     const botEntrypoint = new lambda.Function(this, 'BotEntrypoint', {
@@ -44,7 +44,7 @@ export class PodcastsRobotStack extends Stack {
       runtime: lambda.Runtime.NODEJS_16_X,
       code: lambda.Code.fromAsset('lambda/video-downloader'),
       handler: 'handler.handler',
-      timeout: Duration.seconds(3 * 60),
+      timeout: Duration.minutes(3),
       memorySize: 480,
       architecture: lambda.Architecture.ARM_64,
       environment: {
