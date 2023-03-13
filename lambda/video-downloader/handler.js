@@ -39,22 +39,25 @@ const processRecord = async ({ videoLink, chatId, requestMessageId }) => {
 
   console.debug('Downloaded chunks:', chunks);
 
-  const telegramAudios = chunks.map(async (chunk) => {
-    const url = await storeFile(chunk.tmpPath, chunk.stream);
+  const telegramAudios = await Promise.all(
+    chunks.map(async (chunk) => {
+      const url = await storeFile(chunk.tmpPath, chunk.stream);
 
-    return {
-      audio: url,
-      title: chunk.filename,
-      performer,
-      duration: chunk.segmentDurationS,
-    };
-  });
+      return {
+        audio: url,
+        title: chunk.filename,
+        performer,
+        duration: chunk.segmentDurationS,
+      };
+    })
+  );
 
   console.debug('Sending to telegram...')
   return await telegramApi({
     type: 'downloadSuccess',
     chatId,
     requestMessageId,
+    title,
     audioData: await Promise.all(telegramAudios),
   }).then((...args) => {
     cleanUp(videoId);
@@ -82,6 +85,5 @@ exports.handler = async (event) => {
   }, 150_000).catch((err) => {
     console.error(err);
   });
-  console.debug('All records processed!');
   return Promise.resolve({});
 };

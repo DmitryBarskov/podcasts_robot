@@ -29,22 +29,30 @@ const splitAudioStream = async (
   fs.mkdirSync(`/tmp/${dirname}`, { recursive: true });
 
   if (sizeMb < maxSegmentSizeMb) {
-    console.debug('Continue without splitting');
     const filename = `${prefix}.m4a`;
     const tmpPath = `${dirname}/${filename}`;
     const fullPath = `/tmp/${tmpPath}`;
+    console.debug('Continue without splitting', { filename, tmpPath, fullPath });
 
-    fs.createWriteStream(fullPath, audio);
+    return new Promise((resolve, reject) => {
+      audio
+        .pipe(fs.createWriteStream(fullPath))
+        .on('finish', () => {
+          const fileData = {
+            stream: fs.createReadStream(fullPath),
+            tmpPath,
+            filename,
+            fullPath,
+            segmentDurationS: durationS,
+          };
+          console.debug('Stream downloaded without splitting', fileData);
+          resolve([fileData]);
+        }).on('error', (err) => {
+          console.debug('Error downloading stream', err);
+          reject(err);
+        });
+    });
 
-    return Promise.resolve([
-      {
-        stream: fs.createReadStream(fullPath),
-        tmpPath,
-        filename,
-        fullPath,
-        segmentDurationS: durationS,
-      }
-    ]);
   }
 
   const segments = segmentsAmount({ maxSegmentSizeMb, fileSizeMb: sizeMb });

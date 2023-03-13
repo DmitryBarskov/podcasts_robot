@@ -14,10 +14,12 @@ export class PodcastsRobotStack extends Stack {
   constructor (scope: Construct, id: string, props: PodcastsRobotStackProps) {
     super(scope, id, props);
 
-    const downloadRequestQueue = new Queue(this, 'DownloadRequestQueue');
+    const downloadRequestQueue = new Queue(this, 'DownloadRequestQueue', {
+      visibilityTimeout: Duration.seconds(3 * 60),
+    });
 
     const telegramRequestQueue = new Queue(this, 'TelegramRequestQueue', {
-      visibilityTimeout: Duration.seconds(300),
+      visibilityTimeout: Duration.seconds(5 * 60),
     });
 
     const botEntrypoint = new lambda.Function(this, 'BotEntrypoint', {
@@ -34,7 +36,7 @@ export class PodcastsRobotStack extends Stack {
     downloadRequestQueue.grantSendMessages(botEntrypoint);
 
     const podcastsStorage = new Bucket(this, 'PodcastsStorage', {
-      bucketName: 'podcastsrobot',
+      bucketName: 'podcasts-robot',
       removalPolicy: RemovalPolicy.RETAIN,
       publicReadAccess: true,
     });
