@@ -1,5 +1,5 @@
-import { Stack, type StackProps, Duration, RemovalPolicy } from 'aws-cdk-lib';
-import { type Construct } from 'constructs';
+import { Stack, StackProps, Duration, RemovalPolicy } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
@@ -14,10 +14,12 @@ export class PodcastsRobotStack extends Stack {
   constructor (scope: Construct, id: string, props: PodcastsRobotStackProps) {
     super(scope, id, props);
 
-    const downloadRequestQueue = new Queue(this, 'DownloadRequestQueue');
+    const downloadRequestQueue = new Queue(this, 'DownloadRequestQueue', {
+      visibilityTimeout: Duration.minutes(3),
+    });
 
     const telegramRequestQueue = new Queue(this, 'TelegramRequestQueue', {
-      visibilityTimeout: Duration.seconds(300),
+      visibilityTimeout: Duration.minutes(5),
     });
 
     const botEntrypoint = new lambda.Function(this, 'BotEntrypoint', {
@@ -34,7 +36,7 @@ export class PodcastsRobotStack extends Stack {
     downloadRequestQueue.grantSendMessages(botEntrypoint);
 
     const podcastsStorage = new Bucket(this, 'PodcastsStorage', {
-      bucketName: 'podcastsrobot',
+      bucketName: 'podcasts-robot',
       removalPolicy: RemovalPolicy.RETAIN,
       publicReadAccess: true,
     });
@@ -42,7 +44,7 @@ export class PodcastsRobotStack extends Stack {
       runtime: lambda.Runtime.NODEJS_16_X,
       code: lambda.Code.fromAsset('lambda/video-downloader'),
       handler: 'handler.handler',
-      timeout: Duration.seconds(3 * 60),
+      timeout: Duration.minutes(3),
       memorySize: 480,
       architecture: lambda.Architecture.ARM_64,
       environment: {

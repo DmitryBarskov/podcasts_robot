@@ -19,10 +19,11 @@ const telegramMethod = (method, { body = null, headers = {} }) => {
       ...headers
     },
     body: body ? JSON.stringify(body) : '',
-  }).then(r => r.json()).then(response => {
-    console.debug('Received response from telegram:', response);
-    return response;
-  });
+  }).then((r) => r.json())
+    .then((response) => {
+      console.debug('Received response from telegram:', response);
+      return response;
+    });
 };
 
 module.exports = telegramMethod;

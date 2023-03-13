@@ -18,7 +18,15 @@ const processRecord = async (event) => {
         text: event.title,
       },
     });
-    const sendAudioChunks = event.audioData.map(chunk => {
+    /**
+     * chunk has type of {
+     *   audio: String, // file URL
+     *   title: String,
+     *   performer: String,
+     *   duration: Number, // duration in seconds
+     * }
+     */
+    const sendAudioChunks = event.audioData.map((chunk) => {
       return telegramMethod('sendAudio', {
         body: {
           chat_id: event.chatId,
@@ -26,6 +34,17 @@ const processRecord = async (event) => {
           allow_sending_without_reply: true,
           ...chunk,
         },
+      }).then(async (response) => {
+        if (response.ok) return;
+        if (response.description.match(/wrong file/) === null) return;
+
+        await telegramMethod('sendMessage', {
+          body: {
+            chat_id: event.chatId,
+            reply_to_message_id: event.requestMessageId,
+            text: `😔 Telegram could not process URL: ${chunk.audio}`,
+          },
+        });
       });
     });
     return await Promise.all([sendTitle, ...sendAudioChunks]);

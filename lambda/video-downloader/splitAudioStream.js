@@ -12,7 +12,6 @@ const lastSegmentDuration = ({ segmentsAmount, duration }) =>
   duration - segmentsAmount * segmentDuration({ segmentsAmount, duration });
 
 /**
- *
  * @param {Stream} audio audio stream to split
  * @param {number} maxSegmentSizeMb
  * @param {number} sizeMb
@@ -24,13 +23,51 @@ const lastSegmentDuration = ({ segmentsAmount, duration }) =>
 const splitAudioStream = async (
   audio, { maxSegmentSizeMb, sizeMb, durationS, dirname, prefix }
 ) => {
-  console.debug('Splitting', { maxSegmentSizeMb, sizeMb, durationS, dirname, prefix });
-  const segments = segmentsAmount({ maxSegmentSizeMb, fileSizeMb: sizeMb });
-  const segmentDurationS = segmentDuration({
-    segmentsAmount: segments, duration: durationS
-  });
+  console.debug('invoke splitAudioStream', { maxSegmentSizeMb, sizeMb, durationS, dirname, prefix });
 
   fs.mkdirSync(`/tmp/${dirname}`, { recursive: true });
+
+  if (sizeMb < maxSegmentSizeMb) {
+    const filename = `${prefix}.m4a`;
+    const tmpPath = `${dirname}/${filename}`;
+    const fullPath = `/tmp/${tmpPath}`;
+    console.debug('Continue without splitting', { filename, tmpPath, fullPath });
+
+    return new Promise((resolve, reject) => {
+      audio
+        .pipe(fs.createWriteStream(fullPath))
+        .on('finish', () => {
+          const fileData = {
+            stream: fs.createReadStream(fullPath),
+            tmpPath,
+            filename,
+            fullPath,
+            segmentDurationS: durationS,
+          };
+          console.debug('Stream downloaded without splitting', fileData);
+          resolve([fileData]);
+        }).on('error', (err) => {
+          console.debug('Error downloading stream', err);
+          reject(err);
+        });
+    });
+  }
+
+  const segments = segmentsAmount({ maxSegmentSizeMb, fileSizeMb: sizeMb });
+  const segmentDurationS = segmentDuration({
+    segmentsAmount: segments,
+    duration: durationS
+  });
+
+  console.debug('Splitting...', {
+    maxSegmentSizeMb,
+    sizeMb,
+    durationS,
+    dirname,
+    prefix,
+    segments,
+    segmentDurationS,
+  });
 
   const ffmpegProcess = cp.spawn(ffmpeg, [
     '-loglevel', '8', '-hide_banner',
