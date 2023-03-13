@@ -52,7 +52,7 @@ const processRecord = async ({ videoLink, chatId, requestMessageId }) => {
     })
   );
 
-  console.debug('Sending to telegram...')
+  console.debug('Sending to telegram...');
   return await telegramApi({
     type: 'downloadSuccess',
     chatId,

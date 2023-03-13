@@ -12,7 +12,6 @@ const lastSegmentDuration = ({ segmentsAmount, duration }) =>
   duration - segmentsAmount * segmentDuration({ segmentsAmount, duration });
 
 /**
- *
  * @param {Stream} audio audio stream to split
  * @param {number} maxSegmentSizeMb
  * @param {number} sizeMb
@@ -52,12 +51,12 @@ const splitAudioStream = async (
           reject(err);
         });
     });
-
   }
 
   const segments = segmentsAmount({ maxSegmentSizeMb, fileSizeMb: sizeMb });
   const segmentDurationS = segmentDuration({
-    segmentsAmount: segments, duration: durationS
+    segmentsAmount: segments,
+    duration: durationS
   });
 
   console.debug('Splitting...', {
