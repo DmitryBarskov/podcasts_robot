@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "handler.js",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.289.0",
+    "@aws-sdk/client-s3": "^3.299.0",
     "@aws-sdk/client-sqs": "^3.282.0",
     "ffmpeg-static": "^5.1.0",
     "transliteration": "^2.3.5",
