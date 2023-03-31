@@ -18,14 +18,14 @@ export class VideoDownloader extends Construct {
 
     const podcastsStorage = new Bucket(this, 'PodcastsStorage', {
       bucketName: 'podcasts-robot',
-      removalPolicy: RemovalPolicy.RETAIN,
+      removalPolicy: RemovalPolicy.DESTROY,
       publicReadAccess: true,
     });
 
     const { telegramApiRequestQueue } = props;
 
     const videoDownloader = new Function(this, 'VideoDownloader', {
-      runtime: Runtime.NODEJS_16_X,
+      runtime: Runtime.NODEJS_18_X,
       code: Code.fromAsset('lambda/video-downloader'),
       handler: 'handler.handler',
       timeout: VideoDownloader.timeout,

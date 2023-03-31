@@ -1,11 +1,11 @@
 import { Duration, StackProps } from "aws-cdk-lib";
 import { Queue } from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
-import { Function, Runtime, Code } from 'aws-cdk-lib/aws-lambda';
+import { Function, Runtime, Code, Architecture } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 
 export interface TelegramApiProps extends StackProps {
-  botToken: string
+  botToken: string;
 }
 
 export class TelegramApi extends Construct {
@@ -19,7 +19,8 @@ export class TelegramApi extends Construct {
     });
 
     const telegramApi = new Function(this, 'TelegramApi', {
-      runtime: Runtime.NODEJS_16_X,
+      runtime: Runtime.NODEJS_18_X,
+      architecture: Architecture.ARM_64,
       code: Code.fromAsset('lambda/telegram-api'),
       handler: 'handler.handler',
       environment: {

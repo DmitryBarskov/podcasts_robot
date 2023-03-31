@@ -12,5 +12,8 @@ build: setup
 	cd lambda/telegram-api && npm install
 	cd lambda/video-downloader && npm install
 
-deploy: build
-	source .env && aws-vault exec fwd-tweet -- npx cdk deploy --hotswap
+deploy:
+	source .env && aws-vault exec podcasts -- npx cdk deploy
+
+destroy:
+	source .env && aws-vault exec podcasts -- npx cdk destroy
