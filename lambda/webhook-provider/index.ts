@@ -1,10 +1,10 @@
-import {
+import type {
   CdkCustomResourceEvent,
   CdkCustomResourceResponse,
   Context,
 } from 'aws-lambda';
 
-import { setWebhook, deleteWebhook, TelegramResponse } from './telegramApi';
+import { setWebhook, deleteWebhook, type TelegramResponse } from './telegramApi';
 
 export const handler = async (
   event: CdkCustomResourceEvent,
@@ -17,12 +17,12 @@ export const handler = async (
     PhysicalResourceId: context.logGroupName,
   };
 
-  const errorResponse = (message: string) => {
+  const errorResponse = (message: string): CdkCustomResourceResponse => {
     console.error(message);
     return {
       ...responseDefaults,
       Status: 'FAILED',
-      Data: { Response: message, },
+      Data: { Response: message },
     };
   };
 
@@ -30,7 +30,7 @@ export const handler = async (
 
   let telegramResponse: TelegramResponse;
 
-  if (event.RequestType === "Create" || event.RequestType === "Update") {
+  if (event.RequestType === 'Create' || event.RequestType === 'Update') {
     const webhookUrl: string | undefined = event.ResourceProperties.webhookUrl;
 
     if (webhookUrl === undefined) {
@@ -38,7 +38,7 @@ export const handler = async (
     }
 
     telegramResponse = await setWebhook(webhookUrl);
-  } else if (event.RequestType === "Delete") {
+  } else if (event.RequestType === 'Delete') {
     telegramResponse = await deleteWebhook();
   } else {
     return errorResponse('Unsupported event type!');
@@ -48,6 +48,6 @@ export const handler = async (
   return {
     ...responseDefaults,
     Status: telegramResponse.ok ? 'SUCCESS' : 'FAILED',
-    Data: { Response: JSON.stringify(telegramResponse), },
+    Data: { Response: JSON.stringify(telegramResponse) },
   };
 };

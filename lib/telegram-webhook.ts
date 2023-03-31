@@ -1,6 +1,5 @@
-import { CustomResource, ResourceProps, Stack, StackProps } from 'aws-cdk-lib';
-import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
-import { Architecture, Runtime, type IFunction } from 'aws-cdk-lib/aws-lambda';
+import { CustomResource, ResourceProps } from 'aws-cdk-lib';
+import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
@@ -14,7 +13,7 @@ export interface TelegramWebhookProps extends ResourceProps {
 export class TelegramWebhook extends Construct {
   readonly response: string;
 
-  constructor (scope: Construct, id: string, props: TelegramWebhookProps) {
+  constructor(scope: Construct, id: string, props: TelegramWebhookProps) {
     super(scope, id);
 
     const func = new NodejsFunction(scope, 'TelegramWebhookSetter', {
