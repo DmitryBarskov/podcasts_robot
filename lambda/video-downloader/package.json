@@ -7,6 +7,6 @@
     "@aws-sdk/client-sqs": "^3.301.0",
     "ffmpeg-static": "^5.1.0",
     "transliteration": "^2.3.5",
-    "ytdl-core": "^4.11.2"
+    "ytdl-core": "^4.11.3"
   }
 }
