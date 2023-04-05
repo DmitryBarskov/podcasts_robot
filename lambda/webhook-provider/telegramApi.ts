@@ -17,7 +17,10 @@ const fetchJson = async (method: string, options: { body?: string } = {}): Promi
       Accept: 'application/json',
     },
     ...options
-  }).then(async (r: Body) => await r.json()) as TelegramResponse;
+  }).then(async (r: Body) => {
+    // eslint-disable-next-line @typescript-eslint/return-await
+    return await r.json() as TelegramResponse;
+  });
 };
 
 export const setWebhook = async (webhookUrl: string): Promise<TelegramResponse> =>
