@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import fetch, { type Body } from 'node-fetch';
 
 export interface TelegramResponse {
   ok: boolean
@@ -17,7 +17,7 @@ const fetchJson = async (method: string, options: { body?: string } = {}): Promi
       Accept: 'application/json',
     },
     ...options
-  }).then(async (r) => await r.json()) as TelegramResponse;
+  }).then(async (r: Body) => await r.json()) as TelegramResponse;
 };
 
 export const setWebhook = async (webhookUrl: string): Promise<TelegramResponse> =>
