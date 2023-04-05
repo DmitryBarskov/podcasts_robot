@@ -10,6 +10,7 @@ const fetchJson = async (method: string, options: { body?: string } = {}): Promi
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/${method}`;
   console.info('Sending request to telegram', [url, options]);
 
+  // eslint-disable-next-line @typescript-eslint/return-await
   return await fetch(url, {
     method: 'POST',
     headers: {
