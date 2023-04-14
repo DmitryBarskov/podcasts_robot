@@ -1,11 +1,10 @@
 SHELL := /bin/bash
 
-set_webhook:
-	source .env && npx ts-node bin/set_webhook.ts
-
-setup:
-	npm install
+.env:
 	cp .env.example .env
+
+setup: .env
+	npm install
 
 build: setup
 	cd lambda/bot-entrypoint && npm install
