@@ -12,6 +12,11 @@ build: setup
 	cd lambda/telegram-api && npm install
 	cd lambda/video-downloader && npm install
 
+audit fix:
+	cd lambda/bot-entrypoint && npm audit fix
+	cd lambda/telegram-api && npm audit fix
+	cd lambda/video-downloader && npm audit fix
+
 deploy:
 	source .env && aws-vault exec podcasts -- npx cdk deploy
 
